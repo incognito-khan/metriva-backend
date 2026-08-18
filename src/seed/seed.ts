@@ -6,7 +6,7 @@ async function seed() {
   const app = await NestFactory.createApplicationContext(AppModule);
   const usersService = app.get(UsersService);
 
-  console.log('Seeding database...');
+  console.log('Seeding database...', !!usersService);
   // Add seeding logic here in future tasks
   console.log('Seeding completed');
 

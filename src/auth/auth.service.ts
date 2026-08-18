@@ -20,7 +20,6 @@ import { SendOtpDto } from "./dto/send-otp.dto";
 import { VerifyOtpDto } from "./dto/verify-otp.dto";
 import { ResendOtpDto } from "./dto/resend-otp.dto";
 import { EmailService } from "../email/email.service";
-import { CookieUtils } from "../common/utils/cookie.utils";
 
 @Injectable()
 export class AuthService {
@@ -64,7 +63,7 @@ export class AuthService {
     const otp = this.generateOTP();
     const otpHash = await bcrypt.hash(otp, 10);
     const otpExpiresInMinutes =
-      this.configService.get<number>("OTP_EXPIRES_IN") || 5;
+      this.configService.get<number>("otp.expiresIn") || 5;
     const otpExpiresAt = new Date(Date.now() + otpExpiresInMinutes * 60 * 1000);
 
     // Store OTP hash and expiration
@@ -108,7 +107,7 @@ export class AuthService {
     }
 
     // Compare password using the User model's comparePassword method
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await (user as any).comparePassword(password);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException("Invalid email or password");
@@ -125,9 +124,8 @@ export class AuthService {
     const accessToken = this.jwtService.sign(
       { sub: user._id.toString(), type: "access" },
       {
-        secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
-        expiresIn:
-          this.configService.get<string>("JWT_ACCESS_EXPIRES_IN") || "15m",
+        secret: this.configService.get<string>("jwt.accessSecret"),
+        expiresIn: (this.configService.get<string>("JWT_ACCESS_EXPIRES_IN") || "15m") as any,
       },
     );
 
@@ -135,8 +133,7 @@ export class AuthService {
       { sub: user._id.toString(), type: "refresh" },
       {
         secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
-        expiresIn:
-          this.configService.get<string>("JWT_REFRESH_EXPIRES_IN") || "7d",
+        expiresIn: (this.configService.get<string>("JWT_REFRESH_EXPIRES_IN") || "7d") as any,
       },
     );
 
@@ -175,9 +172,8 @@ export class AuthService {
       const newAccessToken = this.jwtService.sign(
         { sub: userId, type: "access" },
         {
-          secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
-          expiresIn:
-            this.configService.get<string>("JWT_ACCESS_EXPIRES_IN") || "15m",
+          secret: this.configService.get<string>("jwt.accessSecret"),
+          expiresIn: (this.configService.get<string>("JWT_ACCESS_EXPIRES_IN") || "15m") as any,
         },
       );
 
@@ -257,7 +253,7 @@ export class AuthService {
 
     // Generate reset URL
     const frontendUrl =
-      this.configService.get<string>("FRONTEND_URL") || "http://localhost:3000";
+      this.configService.get<string>("frontend.url") || "http://localhost:3000";
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
     // Send password reset email
@@ -304,7 +300,7 @@ export class AuthService {
     }
 
     // Check if token has expired
-    if (user.passwordResetExpires < new Date()) {
+    if (!user.passwordResetExpires || user.passwordResetExpires < new Date()) {
       // Clear expired token
       user.passwordResetToken = undefined;
       user.passwordResetExpires = undefined;
@@ -356,7 +352,7 @@ export class AuthService {
 
     // Set OTP expiration (configurable, default 5 minutes)
     const otpExpiresInMinutes =
-      this.configService.get<number>("OTP_EXPIRES_IN") || 5;
+      this.configService.get<number>("otp.expiresIn") || 5;
     const otpExpiresAt = new Date(Date.now() + otpExpiresInMinutes * 60 * 1000);
 
     // Store OTP hash and expiration
@@ -408,7 +404,7 @@ export class AuthService {
     }
 
     // Check if OTP has expired
-    if (user.otpExpiresAt < new Date()) {
+    if (!user.otpExpiresAt || user.otpExpiresAt < new Date()) {
       // Clear expired OTP
       user.otpHash = undefined;
       user.otpExpiresAt = undefined;
@@ -469,7 +465,7 @@ export class AuthService {
 
     // Set new OTP expiration (configurable, default 5 minutes)
     const otpExpiresInMinutes =
-      this.configService.get<number>("OTP_EXPIRES_IN") || 5;
+      this.configService.get<number>("otp.expiresIn") || 5;
     const otpExpiresAt = new Date(Date.now() + otpExpiresInMinutes * 60 * 1000);
 
     // Store new OTP hash and expiration (invalidates previous OTP)

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document, Model } from "mongoose";
+import { Document } from "mongoose";
 import * as bcrypt from "bcrypt";
 
 export type UserDocument = User & Document;
@@ -18,7 +18,7 @@ export class User {
     minlength: [2, "Name must be at least 2 characters"],
     maxlength: [50, "Name cannot exceed 50 characters"],
   })
-  name: string;
+  name!: string;
 
   @Prop({
     required: [true, "Email is required"],
@@ -27,61 +27,56 @@ export class User {
     unique: true,
     index: true,
   })
-  email: string;
+  email!: string;
 
   @Prop({
     required: [true, "Password is required"],
     select: false,
   })
-  password: string;
+  password!: string;
 
   @Prop({ default: false })
-  emailVerified: boolean;
+  emailVerified!: boolean;
 
   @Prop({ select: false })
-  passwordResetToken: string;
+  passwordResetToken?: string;
 
   @Prop({ select: false })
-  passwordResetExpires: Date;
+  passwordResetExpires?: Date;
 
   @Prop({ select: false })
-  otpHash: string;
+  otpHash?: string;
 
   @Prop({ select: false })
-  otpExpiresAt: Date;
+  otpExpiresAt?: Date;
 
   @Prop({
     type: String,
     enum: UserRole,
     default: UserRole.CLIENT_USER,
   })
-  role: UserRole;
+  role!: UserRole;
 
   @Prop({ type: "ObjectId", ref: "Organization", default: null })
-  organization: string;
+  organization?: string;
 
   @Prop({ type: "ObjectId", ref: "Role", default: null })
-  assignedRole: string;
+  assignedRole?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
 // Hash password before saving
-UserSchema.pre("save", async function (next) {
+UserSchema.pre("save", async function () {
   const user = this as UserDocument;
 
   // Only hash the password if it has been modified (or is new)
   if (!user.isModified("password")) {
-    return next();
+    return;
   }
 
-  try {
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(user.password, salt);
 });
 
 // Method to compare password

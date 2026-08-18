@@ -1,0 +1,93 @@
+### Metriva NestJS API Endpoints - REST Client File
+### Base URL: http://localhost:5000 (or http://localhost:5001)
+
+@baseUrl = http://localhost:5000
+@contentType = application/json
+
+####################################
+# Health Check (Public Endpoints)
+####################################
+
+### Health Check (/api/health)
+GET {{baseUrl}}/api/health
+
+### Health Check (/health)
+GET {{baseUrl}}/health
+
+
+####################################
+# Authentication Endpoints
+####################################
+
+### 1. Register New User
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Test User",
+  "email": "testuser@example.com",
+  "password": "Password123!"
+}
+
+### 2. Send OTP
+POST {{baseUrl}}/api/auth/send-otp
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser@example.com"
+}
+
+### 3. Verify OTP
+POST {{baseUrl}}/api/auth/verify-otp
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser@example.com",
+  "otp": "123456"
+}
+
+### 4. Resend OTP
+POST {{baseUrl}}/api/auth/resend-otp
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser@example.com"
+}
+
+### 5. Login User
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser@example.com",
+  "password": "Password123!"
+}
+
+### 6. Get Current User (/api/auth/me)
+GET {{baseUrl}}/api/auth/me
+Content-Type: {{contentType}}
+
+### 7. Forgot Password
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser@example.com"
+}
+
+### 8. Reset Password
+POST {{baseUrl}}/api/auth/reset-password
+Content-Type: {{contentType}}
+
+{
+  "token": "REPLACE_WITH_RESET_TOKEN",
+  "password": "NewPassword123!"
+}
+
+### 9. Refresh Access Token
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: {{contentType}}
+
+### 10. Logout User
+POST {{baseUrl}}/api/auth/logout
+Content-Type: {{contentType}}

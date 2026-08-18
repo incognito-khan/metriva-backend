@@ -7,7 +7,7 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { AuthService } from "./auth.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
@@ -22,6 +22,7 @@ import { CookieUtils } from "../common/utils/cookie.utils";
 import { ConfigService } from "@nestjs/config";
 
 @Controller("api/auth")
+@UseGuards(JwtAuthGuard)
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -62,7 +63,7 @@ export class AuthController {
 
   @Public()
   @Post("refresh")
-  async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies.refreshToken;
     const result = await this.authService.refresh(refreshToken);
 
@@ -72,9 +73,6 @@ export class AuthController {
       result.data.accessToken,
       this.configService,
     );
-
-    // Remove token from response body (it's in cookie)
-    const { accessToken, ...dataWithoutToken } = result.data;
 
     return {
       success: result.success,
@@ -122,8 +120,7 @@ export class AuthController {
   }
 
   @Get("me")
-  @UseGuards(JwtAuthGuard)
-  async getCurrentUser(@Req() req) {
+  async getCurrentUser(@Req() req: any) {
     return this.authService.getCurrentUser(req.user.id);
   }
 }
