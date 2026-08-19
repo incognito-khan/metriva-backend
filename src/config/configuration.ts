@@ -11,10 +11,13 @@ export default () => {
     }
   }
 
+  const mongoUri = process.env.MONGODB_URI!;
+
   return {
     port: parseInt(process.env.PORT || "5000", 10),
     mongodb: {
-      uri: process.env.MONGODB_URI,
+      uri:
+        mongoUri + (mongoUri.includes("?") ? "&" : "?") + "retryWrites=false",
     },
     jwt: {
       accessSecret: process.env.JWT_ACCESS_SECRET,

@@ -60,8 +60,8 @@ POST {{baseUrl}}/api/auth/login
 Content-Type: {{contentType}}
 
 {
-  "email": "testuser@example.com",
-  "password": "Password123!"
+  "email": "admin@metriva.com",
+  "password": "SuperAdmin@123!"
 }
 
 ### 6. Get Current Authenticated User (Requires Login Cookie)
@@ -91,4 +91,90 @@ Content-Type: {{contentType}}
 
 ### 10. Logout User
 POST {{baseUrl}}/api/auth/logout
+Content-Type: {{contentType}}
+
+
+####################################
+# Organization Endpoints
+####################################
+
+# Setting organization and client id
+# Replace with the actual values from previous responses
+@orgId = 6a85e7b102697c93a8a41bbc
+@clientId = 6a85e8b102697c93a8a41bbd
+
+### 11. Create Organization (SUPER_ADMIN only)
+POST {{baseUrl}}/api/organizations
+Content-Type: {{contentType}}
+
+{
+  "name": "Test Agency",
+  "email": "agency@example.com",
+  "phone": "+1234567890",
+  "website": "https://testagency.com",
+  "address": "123 Main St, City, State",
+  "adminName": "Agency Admin",
+  "adminEmail": "admin@agency.com",
+  "adminPassword": "AdminPass123!"
+}
+
+### 12. Get All Organizations
+GET {{baseUrl}}/api/organizations
+Content-Type: {{contentType}}
+
+### 13. Get Organization by ID
+GET {{baseUrl}}/api/organizations/{{orgId}}
+Content-Type: {{contentType}}
+
+### 14. Update Organization (SUPER_ADMIN only)
+PATCH {{baseUrl}}/api/organizations/{{orgId}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Updated Agency Name"
+}
+
+### 15. Delete Organization (SOFT DELETE - SUPER_ADMIN only)
+DELETE {{baseUrl}}/api/organizations/{{orgId}}
+Content-Type: {{contentType}}
+
+
+####################################
+# Client Endpoints
+####################################
+
+### 16. Create Client (SUPER_ADMIN or AGENCY_ADMIN)
+POST {{baseUrl}}/api/clients
+Content-Type: {{contentType}}
+
+{
+  "businessName": "Local Pizza Shop",
+  "website": "https://localpizza.com",
+  "businessCategory": "Restaurant",
+  "location": "Downtown, City",
+  "phone": "+1234567890",
+  "email": "contact@localpizza.com",
+  "timezone": "America/New_York",
+  "organization": "{{orgId}}"
+}
+
+### 17. Get All Clients (with pagination, search, status filter)
+GET {{baseUrl}}/api/clients?page=1&limit=20&search=pizza&status=active
+Content-Type: {{contentType}}
+
+### 18. Get Client by ID
+GET {{baseUrl}}/api/clients/{{clientId}}
+Content-Type: {{contentType}}
+
+### 19. Update Client
+PATCH {{baseUrl}}/api/clients/{{clientId}}
+Content-Type: {{contentType}}
+
+{
+  "businessName": "Updated Pizza Shop",
+  "phone": "+1987654321"
+}
+
+### 20. Delete Client (SOFT DELETE - status='inactive')
+DELETE {{baseUrl}}/api/clients/{{clientId}}
 Content-Type: {{contentType}}
