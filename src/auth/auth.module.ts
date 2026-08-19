@@ -26,6 +26,6 @@ import { JwtRefreshGuard } from "../common/guards/jwt-refresh.guard";
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtAuthGuard, JwtRefreshGuard],
-  exports: [AuthService, JwtAuthGuard, JwtRefreshGuard],
+  exports: [AuthService, JwtAuthGuard, JwtRefreshGuard, JwtModule],
 })
 export class AuthModule {}

@@ -125,7 +125,8 @@ export class AuthService {
       { sub: user._id.toString(), type: "access" },
       {
         secret: this.configService.get<string>("jwt.accessSecret"),
-        expiresIn: (this.configService.get<string>("JWT_ACCESS_EXPIRES_IN") || "15m") as any,
+        expiresIn: (this.configService.get<string>("JWT_ACCESS_EXPIRES_IN") ||
+          "15m") as any,
       },
     );
 
@@ -133,7 +134,8 @@ export class AuthService {
       { sub: user._id.toString(), type: "refresh" },
       {
         secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
-        expiresIn: (this.configService.get<string>("JWT_REFRESH_EXPIRES_IN") || "7d") as any,
+        expiresIn: (this.configService.get<string>("JWT_REFRESH_EXPIRES_IN") ||
+          "7d") as any,
       },
     );
 
@@ -173,7 +175,8 @@ export class AuthService {
         { sub: userId, type: "access" },
         {
           secret: this.configService.get<string>("jwt.accessSecret"),
-          expiresIn: (this.configService.get<string>("JWT_ACCESS_EXPIRES_IN") || "15m") as any,
+          expiresIn: (this.configService.get<string>("JWT_ACCESS_EXPIRES_IN") ||
+            "15m") as any,
         },
       );
 
@@ -286,7 +289,7 @@ export class AuthService {
     for (const candidateUser of usersWithResetToken) {
       const isTokenValid = await bcrypt.compare(
         token,
-        candidateUser.passwordResetToken,
+        candidateUser.passwordResetToken || "",
       );
       if (isTokenValid) {
         user = candidateUser;

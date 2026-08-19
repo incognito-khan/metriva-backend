@@ -6,6 +6,7 @@ import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
 import { EmailModule } from "./email/email.module";
 import { CommonModule } from "./common/common.module";
+import { OrganizationsModule } from "./organizations/organizations.module";
 import { HealthController } from "./common/controllers/health.controller";
 
 @Module({
@@ -22,6 +23,7 @@ import { HealthController } from "./common/controllers/health.controller";
     AuthModule,
     UsersModule,
     EmailModule,
+    OrganizationsModule,
   ],
   controllers: [HealthController],
 })
