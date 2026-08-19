@@ -18,6 +18,8 @@ import { CreateOrganizationDto } from "./dto/create-organization.dto";
 import { UpdateOrganizationDto } from "./dto/update-organization.dto";
 import { AuthenticatedUser } from "../common/interfaces/authenticated-user.interface";
 import { InjectConnection } from "@nestjs/mongoose";
+import { Role, RoleDocument } from "../roles/schemas/role.schema";
+import { AVAILABLE_PERMISSIONS } from "../roles/permissions";
 
 @Injectable()
 export class OrganizationsService {
@@ -26,6 +28,8 @@ export class OrganizationsService {
     private organizationModel: Model<OrganizationDocument>,
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
+    @InjectModel(Role.name)
+    private roleModel: Model<RoleDocument>,
     @InjectConnection() private connection: Connection,
   ) {}
 
@@ -116,6 +120,40 @@ export class OrganizationsService {
       createdAdmin.organization = createdOrg._id.toString();
       await createdAdmin.save({ session });
 
+      // Create default system roles for the organization
+      await this.roleModel.create(
+        [
+          {
+            name: "Admin",
+            description: "Full access (system role)",
+            organization: createdOrg._id.toString(),
+            permissions: [...AVAILABLE_PERMISSIONS],
+            isSystem: true,
+          },
+        ],
+        { session },
+      );
+
+      await this.roleModel.create(
+        [
+          {
+            name: "Viewer",
+            description: "Read-only (system role)",
+            organization: createdOrg._id.toString(),
+            permissions: [
+              "clients:read",
+              "leads:read",
+              "revenue:read",
+              "reports:read",
+              "seo:read",
+              "settings:read",
+            ],
+            isSystem: true,
+          },
+        ],
+        { session },
+      );
+
       // Commit the transaction
       await session.commitTransaction();
 
@@ -197,7 +235,9 @@ export class OrganizationsService {
       currentUser.role === UserRole.AGENCY_ADMIN &&
       currentUser.organization !== id
     ) {
-      throw new ForbiddenException("Insufficient permissions");
+      throw new ForbiddenException(
+        "You do not have access to this organization",
+      );
     }
 
     return {

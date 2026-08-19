@@ -5,6 +5,7 @@ import { Model, Connection } from "mongoose";
 import { UserDocument } from "../users/schemas/user.schema";
 import { UserRole } from "../users/schemas/user.schema";
 import { OrganizationStatus } from "../organizations/schemas/organization.schema";
+import { AVAILABLE_PERMISSIONS } from "../roles/permissions";
 
 async function seed() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -17,6 +18,9 @@ async function seed() {
 
   // Get the Organization model
   const organizationModel = connection.model("Organization");
+
+  // Get the Role model
+  const roleModel = connection.model("Role");
 
   console.log("Seeding database...");
 
@@ -58,6 +62,46 @@ async function seed() {
 
   if (existingDemoOrg) {
     console.log("Demo organization already exists, skipping creation");
+
+    // Create default system roles for the demo org if they don't exist (idempotent)
+    const existingAdminRole = await roleModel.findOne({
+      organization: existingDemoOrg._id.toString(),
+      name: "Admin",
+    });
+
+    if (!existingAdminRole) {
+      await roleModel.create({
+        name: "Admin",
+        description: "Full access (system role)",
+        organization: existingDemoOrg._id.toString(),
+        permissions: [...AVAILABLE_PERMISSIONS],
+        isSystem: true,
+      });
+      console.log("Default 'Admin' role created for demo org");
+    }
+
+    const existingViewerRole = await roleModel.findOne({
+      organization: existingDemoOrg._id.toString(),
+      name: "Viewer",
+    });
+
+    if (!existingViewerRole) {
+      await roleModel.create({
+        name: "Viewer",
+        description: "Read-only (system role)",
+        organization: existingDemoOrg._id.toString(),
+        permissions: [
+          "clients:read",
+          "leads:read",
+          "revenue:read",
+          "reports:read",
+          "seo:read",
+          "settings:read",
+        ],
+        isSystem: true,
+      });
+      console.log("Default 'Viewer' role created for demo org");
+    }
   } else {
     // Check if demo admin email already exists
     const existingDemoAdmin = await userModel.findOne({
@@ -118,6 +162,46 @@ async function seed() {
         console.log("Demo organization and admin created successfully");
         console.log(`Demo Admin Email: ${demoAdminEmail}`);
         console.log(`Demo Admin Password: ${demoAdminPassword}`);
+
+        // Create default system roles for the demo org (idempotent)
+        const existingAdminRole = await roleModel.findOne({
+          organization: createdOrg._id.toString(),
+          name: "Admin",
+        });
+
+        if (!existingAdminRole) {
+          await roleModel.create({
+            name: "Admin",
+            description: "Full access (system role)",
+            organization: createdOrg._id.toString(),
+            permissions: [...AVAILABLE_PERMISSIONS],
+            isSystem: true,
+          });
+          console.log("Default 'Admin' role created for demo org");
+        }
+
+        const existingViewerRole = await roleModel.findOne({
+          organization: createdOrg._id.toString(),
+          name: "Viewer",
+        });
+
+        if (!existingViewerRole) {
+          await roleModel.create({
+            name: "Viewer",
+            description: "Read-only (system role)",
+            organization: createdOrg._id.toString(),
+            permissions: [
+              "clients:read",
+              "leads:read",
+              "revenue:read",
+              "reports:read",
+              "seo:read",
+              "settings:read",
+            ],
+            isSystem: true,
+          });
+          console.log("Default 'Viewer' role created for demo org");
+        }
       } catch (error) {
         // Abort the transaction on error
         await session.abortTransaction();

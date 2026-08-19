@@ -46,7 +46,6 @@ export class Client {
     type: "ObjectId",
     ref: "Organization",
     required: [true, "Organization is required"],
-    index: true,
   })
   organization!: string;
 

@@ -7,6 +7,7 @@ import {
   OrganizationSchema,
 } from "./schemas/organization.schema";
 import { User, UserSchema } from "../users/schemas/user.schema";
+import { Role, RoleSchema } from "../roles/schemas/role.schema";
 import { UsersModule } from "../users/users.module";
 import { AuthModule } from "../auth/auth.module";
 
@@ -15,6 +16,7 @@ import { AuthModule } from "../auth/auth.module";
     MongooseModule.forFeature([
       { name: Organization.name, schema: OrganizationSchema },
       { name: User.name, schema: UserSchema },
+      { name: Role.name, schema: RoleSchema },
     ]),
     UsersModule,
     AuthModule,

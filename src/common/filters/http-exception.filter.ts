@@ -38,7 +38,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
           }
         }
 
-        if (responseObj.error) {
+        // Only use error field if we don't already have a custom message
+        if (responseObj.error && !responseObj.message) {
           message = responseObj.error;
         }
       }
@@ -72,8 +73,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   private formatValidationErrors(
     messages: string[] | any[],
-  ): Record<string, string[]> {
-    const errors: Record<string, string[]> = {};
+  ): Array<{ field: string; message: string }> {
+    const errors: Array<{ field: string; message: string }> = [];
 
     messages.forEach((msg) => {
       if (typeof msg === "string") {
@@ -81,23 +82,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
         if (match) {
           const field = match[1];
           const error = match[2];
-          if (!errors[field]) {
-            errors[field] = [];
-          }
-          errors[field].push(error);
+          errors.push({ field, message: error });
         } else {
-          if (!errors["general"]) {
-            errors["general"] = [];
-          }
-          errors["general"].push(msg);
+          errors.push({ field: "general", message: msg });
         }
       } else if (msg && typeof msg === "object" && msg.constraints) {
         const field = msg.property;
-        if (!errors[field]) {
-          errors[field] = [];
-        }
         Object.values(msg.constraints).forEach((constraint: any) => {
-          errors[field].push(constraint);
+          errors.push({ field, message: constraint });
         });
       }
     });

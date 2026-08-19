@@ -1,6 +1,7 @@
 import {
   Injectable,
   UnauthorizedException,
+  ForbiddenException,
   BadRequestException,
   NotFoundException,
   ConflictException,
@@ -115,7 +116,7 @@ export class AuthService {
 
     // Check if email is verified
     if (!user.emailVerified) {
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         "Please verify your email before logging in.",
       );
     }

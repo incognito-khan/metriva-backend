@@ -34,7 +34,9 @@ export class RolesGuard implements CanActivate {
       console.warn(
         `RolesGuard: User role ${user.role} not in required roles ${requiredRoles.join(", ")}`,
       );
-      throw new ForbiddenException("Insufficient permissions");
+      throw new ForbiddenException(
+        "You do not have permission to perform this action",
+      );
     }
 
     return true;

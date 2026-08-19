@@ -65,7 +65,7 @@ Content-Type: {{contentType}}
 # }
 
 {
-  "email": "admin@agency.com",
+  "email": "admin2@agency.com",
   "password": "AdminPass123!"
 }
 
@@ -113,13 +113,13 @@ POST {{baseUrl}}/api/organizations
 Content-Type: {{contentType}}
 
 {
-  "name": "Test1 Agency",
-  "email": "agency1@example.com",
+  "name": "Test2 Agency",
+  "email": "agency2@example.com",
   "phone": "+1234567890",
   "website": "https://testagency.com",
   "address": "123 Main St, City, State",
   "adminName": "Agency Admin",
-  "adminEmail": "admin1@agency.com",
+  "adminEmail": "admin2@agency.com",
   "adminPassword": "AdminPass123!"
 }
 
@@ -305,3 +305,54 @@ Content-Type: {{contentType}}
 # Login as demo admin, then try to access a role from another organization
 GET {{baseUrl}}/api/roles/REPLACE_WITH_OTHER_ORG_ROLE_ID
 Content-Type: {{contentType}}
+
+
+####################################
+# User Management Endpoints (Task 7)
+####################################
+
+# Setting user id
+@userId = 6a8626219b894a5fa3358487
+
+### 30. Create User (AGENCY_ADMIN only) - Creates CLIENT_USER in admin's org
+POST {{baseUrl}}/api/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Team Member",
+  "email": "teammember12@agency.com",
+  "password": "TeamMember123!"
+}
+
+### 31. Get All Users (SUPER_ADMIN or AGENCY_ADMIN)
+# SUPER_ADMIN sees all users, AGENCY_ADMIN sees only own org users
+GET {{baseUrl}}/api/users
+Content-Type: {{contentType}}
+
+### 32. Get User by ID (SUPER_ADMIN or AGENCY_ADMIN)
+GET {{baseUrl}}/api/users/{{userId}}
+Content-Type: {{contentType}}
+
+
+####################################
+# Additional Isolation Tests (Task 7)
+####################################
+
+### TEST 7: Cross-org user access (should return 403)
+# Login as demo admin, then try to access a user from another organization
+GET {{baseUrl}}/api/users/6a860072c19b7485ae62ab73
+Content-Type: {{contentType}}
+
+### TEST 8: Verify default system roles created
+# After creating an organization, verify Admin and Viewer roles exist
+GET {{baseUrl}}/api/roles
+Content-Type: {{contentType}}
+
+### TEST 9: Assign Viewer role to new user (completes Phase-2 loop)
+POST {{baseUrl}}/api/roles/assign
+Content-Type: {{contentType}}
+
+{
+  "user": "{{userId}}",
+  "role": "6a86254a9b894a5fa3358486"
+}
