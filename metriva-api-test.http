@@ -59,9 +59,14 @@ Content-Type: {{contentType}}
 POST {{baseUrl}}/api/auth/login
 Content-Type: {{contentType}}
 
+# {
+#   "email": "admin@metriva.com",
+#   "password": "SuperAdmin@123!"
+# }
+
 {
-  "email": "admin@metriva.com",
-  "password": "SuperAdmin@123!"
+  "email": "admin@agency.com",
+  "password": "AdminPass123!"
 }
 
 ### 6. Get Current Authenticated User (Requires Login Cookie)
@@ -100,21 +105,21 @@ Content-Type: {{contentType}}
 
 # Setting organization and client id
 # Replace with the actual values from previous responses
-@orgId = 6a85e7b102697c93a8a41bbc
-@clientId = 6a85e8b102697c93a8a41bbd
+@orgId = 6a860072c19b7485ae62ab74
+@clientId = 6a86082e39f321d29d221432
 
 ### 11. Create Organization (SUPER_ADMIN only)
 POST {{baseUrl}}/api/organizations
 Content-Type: {{contentType}}
 
 {
-  "name": "Test Agency",
-  "email": "agency@example.com",
+  "name": "Test1 Agency",
+  "email": "agency1@example.com",
   "phone": "+1234567890",
   "website": "https://testagency.com",
   "address": "123 Main St, City, State",
   "adminName": "Agency Admin",
-  "adminEmail": "admin@agency.com",
+  "adminEmail": "admin1@agency.com",
   "adminPassword": "AdminPass123!"
 }
 
@@ -177,4 +182,126 @@ Content-Type: {{contentType}}
 
 ### 20. Delete Client (SOFT DELETE - status='inactive')
 DELETE {{baseUrl}}/api/clients/{{clientId}}
+Content-Type: {{contentType}}
+
+
+####################################
+# Roles Endpoints
+####################################
+
+# Setting role id
+@roleId = 6a85e9b102697c93a8a41bbe
+
+### 21. Create Role (SUPER_ADMIN or AGENCY_ADMIN)
+POST {{baseUrl}}/api/roles
+Content-Type: {{contentType}}
+
+{
+  "name": "Content Manager",
+  "description": "Can manage clients and leads",
+  "organization": "{{orgId}}",
+  "permissions": ["clients:read", "clients:write", "leads:read", "leads:write"]
+}
+
+### 22. Get All Roles (SUPER_ADMIN or AGENCY_ADMIN)
+GET {{baseUrl}}/api/roles
+Content-Type: {{contentType}}
+
+### 23. Get Available Permissions
+GET {{baseUrl}}/api/roles/permissions
+Content-Type: {{contentType}}
+
+### 24. Assign Role to User (SUPER_ADMIN or AGENCY_ADMIN)
+POST {{baseUrl}}/api/roles/assign
+Content-Type: {{contentType}}
+
+{
+  "user": "REPLACE_WITH_USER_ID",
+  "role": "{{roleId}}",
+  "client": "{{clientId}}"
+}
+
+### 25. Get User Roles
+GET {{baseUrl}}/api/roles/user/6a860281c19b7485ae62ab76
+Content-Type: {{contentType}}
+
+### 26. Get Role by ID
+GET {{baseUrl}}/api/roles/{{roleId}}
+Content-Type: {{contentType}}
+
+### 27. Update Role (SUPER_ADMIN or AGENCY_ADMIN)
+PATCH {{baseUrl}}/api/roles/{{roleId}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Updated Content Manager",
+  "description": "Updated description",
+  "permissions": ["clients:read", "clients:write", "leads:read", "leads:write", "reports:read"]
+}
+
+### 28. Delete Role Assignment
+DELETE {{baseUrl}}/api/roles/assign/REPLACE_WITH_ASSIGNMENT_ID
+Content-Type: {{contentType}}
+
+### 29. Delete Role (SOFT DELETE - SUPER_ADMIN or AGENCY_ADMIN)
+DELETE {{baseUrl}}/api/roles/{{roleId}}
+Content-Type: {{contentType}}
+
+
+####################################
+# Isolation & Security Tests
+####################################
+
+### TEST 1: Cross-org client access (should return 403)
+# Login as demo admin, then try to access a client from another organization
+GET {{baseUrl}}/api/clients/{{clientId}}
+Content-Type: {{contentType}}
+
+### TEST 2: Admin creating organization (should return 403)
+# Login as demo admin, then try to create an organization
+POST {{baseUrl}}/api/organizations
+Content-Type: {{contentType}}
+
+{
+  "name": "Unauthorized Agency",
+  "email": "unauthorized@example.com",
+  "adminName": "Unauthorized Admin",
+  "adminEmail": "unauthorizedadmin@example.com",
+  "adminPassword": "Pass123!"
+}
+
+### TEST 3: Modifying system role (should return 403)
+# Try to modify the AGENCY_ADMIN system role (isSystem=true)
+PATCH {{baseUrl}}/api/roles/REPLACE_WITH_SYSTEM_ROLE_ID
+Content-Type: {{contentType}}
+
+{
+  "name": "Hacked Admin Role",
+  "permissions": ["clients:delete"]
+}
+
+### TEST 4: Invalid permission (should return 400)
+# Try to create a role with invalid permissions
+POST {{baseUrl}}/api/roles
+Content-Type: {{contentType}}
+
+{
+  "name": "Invalid Role",
+  "organization": "{{orgId}}",
+  "permissions": ["invalid:permission", "another:invalid"]
+}
+
+### TEST 5: Duplicate role assignment (should return 409)
+# Try to assign the same role to the same user twice
+POST {{baseUrl}}/api/roles/assign
+Content-Type: {{contentType}}
+
+{
+  "user": "REPLACE_WITH_USER_ID",
+  "role": "{{roleId}}"
+}
+
+### TEST 6: Cross-org role access (should return 403)
+# Login as demo admin, then try to access a role from another organization
+GET {{baseUrl}}/api/roles/REPLACE_WITH_OTHER_ORG_ROLE_ID
 Content-Type: {{contentType}}
