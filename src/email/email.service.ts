@@ -73,8 +73,12 @@ export class EmailService {
       await this.transporter.sendMail(mailOptions);
       return true;
     } catch (error) {
-      console.warn("Email dispatch via SMTP failed (SMTP server might be offline). Using console fallback.");
-      console.log(`\n========================================\n[DEV FALLBACK] Password Reset URL for ${email}:\n${resetUrl}\n========================================\n`);
+      console.warn(
+        "Email dispatch via SMTP failed (SMTP server might be offline). Using console fallback.",
+      );
+      console.log(
+        `\n========================================\n[DEV FALLBACK] Password Reset URL for ${email}:\n${resetUrl}\n========================================\n`,
+      );
       return true;
     }
   }
@@ -127,8 +131,13 @@ export class EmailService {
       await this.transporter.sendMail(mailOptions);
       return true;
     } catch (error) {
-      console.warn("Email dispatch via SMTP failed (SMTP server might be offline). Using console fallback.");
-      console.log(`\n========================================\n[DEV FALLBACK] OTP Code for ${email}: ${otp}\n========================================\n`);
+      console.error("🚨 MAILJET SMTP ERROR DETAILS:", error);
+      console.warn(
+        "Email dispatch via SMTP failed (SMTP server might be offline). Using console fallback.",
+      );
+      console.log(
+        `\n========================================\n[DEV FALLBACK] OTP Code for ${email}: ${otp}\n========================================\n`,
+      );
       return true;
     }
   }

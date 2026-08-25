@@ -2,8 +2,10 @@
 ### Base URL: http://localhost:5000 (or http://localhost:5001)
 ### Use this file with REST Client extension in VS Code or similar HTTP client
 
-@baseUrl = http://localhost:5000
+# @baseUrl = http://localhost:5000
+@baseUrl = https://5qz48i7xan82.shares.zrok.io
 @contentType = application/json
+@fetchOptions = { "credentials": "include" }
 
 ####################################
 # Health Check (Public Endpoints)
